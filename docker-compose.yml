@@ -1,0 +1,11 @@
+services:
+
+  postgres:
+    image: postgres:12.0
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    expose:
+      - 5432
+    ports:
+      - published: 5433
+        target: 5432
