@@ -77,4 +77,8 @@ public class PublicationService {
 
         return new PageImpl<>(res);
     }
+
+    public void deletePublication(Long id) {
+        publicationRepository.deleteById(id);
+    }
 }
