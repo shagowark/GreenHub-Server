@@ -1,7 +1,7 @@
 services:
 
   postgres:
-    image: postgres:12.0
+    image: postgres:16.2
     environment:
       - POSTGRES_PASSWORD=postgres
     expose:
@@ -9,3 +9,18 @@ services:
     ports:
       - published: 5433
         target: 5432
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    command: server ~/minio --console-address :9090
+    ports:
+      - '9090:9090'
+      - '9000:9000'
+    volumes:
+      - minio-data:/minio
+volumes:
+  minio-data:
