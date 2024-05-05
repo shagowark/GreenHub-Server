@@ -11,13 +11,11 @@ import ru.greenhubserver.entity.Image;
 import ru.greenhubserver.entity.Publication;
 import ru.greenhubserver.entity.State;
 import ru.greenhubserver.entity.Tag;
+import ru.greenhubserver.exceptions.NotFoundException;
 import ru.greenhubserver.repository.PublicationRepository;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,12 +52,13 @@ public class PublicationService {
 
     public Page<PublicationDtoResponse> findPublications(Pageable pageable, Set<String> tagNames) {
         Page<Publication> found;
-        found = tagNames == null ?  publicationRepository.findAll(pageable) : publicationRepository.findAllByTags(pageable, tagNames);
-
+        found = tagNames == null ? publicationRepository.findAll(pageable) : publicationRepository.findAllByTags(pageable, tagNames);
 
 
         List<PublicationDtoResponse> res = new ArrayList<>();
         for (Publication entity : found) {
+            if (entity.getState() == State.BANNED) continue;
+
             PublicationDtoResponse dto = PublicationDtoResponse.builder()
                     .title(entity.getTitle())
                     .text(entity.getText())
@@ -80,5 +79,17 @@ public class PublicationService {
 
     public void deletePublication(Long id) {
         publicationRepository.deleteById(id);
+    }
+
+    public void banPublication(Long id) {
+        Publication publication = findPublicationById(id);
+        publication.setState(State.BANNED);
+        publicationRepository.save(publication);
+    }
+
+    private Publication findPublicationById(Long id) {
+        return publicationRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Publication not found")
+        );
     }
 }

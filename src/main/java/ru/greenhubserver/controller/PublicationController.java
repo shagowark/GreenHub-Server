@@ -26,20 +26,27 @@ public class PublicationController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    public Page<PublicationDtoResponse> getPublications(Pageable pageable,@RequestParam(required = false) Set<String> tags) {
+    public Page<PublicationDtoResponse> getPublications(Pageable pageable, @RequestParam(required = false) Set<String> tags) {
         return publicationService.findPublications(pageable, tags);
     }
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public IdDto postPublication(@ModelAttribute PublicationDtoRequest publicationDtoRequest, Principal principal){
+    public IdDto postPublication(@ModelAttribute PublicationDtoRequest publicationDtoRequest, Principal principal) {
         publicationService.savePublication(publicationDtoRequest, principal);
         return null;
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePublicationById(@PathVariable Long id){
-         publicationService.deletePublication(id);
+    public void deletePublicationById(@PathVariable Long id) {
+        publicationService.deletePublication(id);
+    }
+
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @Secured("ROLE_ADMIN")
+    public void banPublication(@PathVariable Long id) {
+        publicationService.banPublication(id);
     }
 }
