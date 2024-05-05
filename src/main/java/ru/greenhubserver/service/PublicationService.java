@@ -7,10 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.greenhubserver.dto.controller.PublicationDtoRequest;
 import ru.greenhubserver.dto.controller.PublicationDtoResponse;
-import ru.greenhubserver.entity.Image;
-import ru.greenhubserver.entity.Publication;
-import ru.greenhubserver.entity.State;
-import ru.greenhubserver.entity.Tag;
+import ru.greenhubserver.entity.*;
 import ru.greenhubserver.exceptions.NotFoundException;
 import ru.greenhubserver.repository.PublicationRepository;
 
@@ -50,11 +47,38 @@ public class PublicationService {
         publicationRepository.save(publication);
     }
 
+    public void savePublication(Publication publication){
+        publicationRepository.save(publication);
+    }
+
     public Page<PublicationDtoResponse> findPublications(Pageable pageable, Set<String> tagNames) {
         Page<Publication> found;
         found = tagNames == null ? publicationRepository.findAll(pageable) : publicationRepository.findAllByTags(pageable, tagNames);
+        return new PageImpl<>(publicationToDto(found));
+    }
 
+    public Page<PublicationDtoResponse> findPublications(Pageable pageable, Long userId) {
+        Page<Publication> found = publicationRepository.findAllByUser(userService.findById(userId), pageable);
+        return new PageImpl<>(publicationToDto(found));
+    }
 
+    public void deletePublication(Long id) {
+        publicationRepository.deleteById(id);
+    }
+
+    public void banPublication(Long id) {
+        Publication publication = findPublicationById(id);
+        publication.setState(State.BANNED);
+        publicationRepository.save(publication);
+    }
+
+    public Publication findPublicationById(Long id) {
+        return publicationRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Publication not found")
+        );
+    }
+
+    private List<PublicationDtoResponse> publicationToDto(Page<Publication> found){
         List<PublicationDtoResponse> res = new ArrayList<>();
         for (Publication entity : found) {
             if (entity.getState() == State.BANNED) continue;
@@ -73,23 +97,6 @@ public class PublicationService {
 
             res.add(dto);
         }
-
-        return new PageImpl<>(res);
-    }
-
-    public void deletePublication(Long id) {
-        publicationRepository.deleteById(id);
-    }
-
-    public void banPublication(Long id) {
-        Publication publication = findPublicationById(id);
-        publication.setState(State.BANNED);
-        publicationRepository.save(publication);
-    }
-
-    private Publication findPublicationById(Long id) {
-        return publicationRepository.findById(id).orElseThrow(
-                () -> new NotFoundException("Publication not found")
-        );
+        return res;
     }
 }

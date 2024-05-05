@@ -14,6 +14,10 @@ public class Comment {
     @Column(name = "id")
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "publication_id", nullable = false)
+    private Publication publication;
+
     @Column(name = "text", nullable = false)
     private String text;
 

@@ -56,6 +56,10 @@ public class Publication {
     private Set<Reaction> reactions;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "publication")
+    private Set<Comment> comments;
+
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "user_id")
     private User user;
