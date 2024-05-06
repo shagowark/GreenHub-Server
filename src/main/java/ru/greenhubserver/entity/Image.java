@@ -3,6 +3,7 @@ package ru.greenhubserver.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 
@@ -16,14 +17,14 @@ public class Image {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "created_time")
-    private Instant createdTime;
+    @Column(name = "name")
+    private String name;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "imageId", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @OneToOne(mappedBy = "image", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     private User user;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "imageId", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @OneToOne(mappedBy = "image", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     private Publication publication;
 }

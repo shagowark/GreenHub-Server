@@ -2,15 +2,17 @@ package ru.greenhubserver.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.Set;
 
 @Entity
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "publication")
 @ToString(exclude = {"tags", "reactions"})
 @EqualsAndHashCode(exclude = {"tags", "reactions"})
@@ -30,17 +32,21 @@ public class Publication {
     @Column(name = "rating")
     private Long rating;
 
+    @Column(name = "comments_count")
+    private Long commentsCount;
+
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "image_id")
-    private Image imageId;
+    private Image image;
 
     @Column(name = "created_time", nullable = false)
+    @CreationTimestamp
     private Instant createdTime;
 
     @ManyToMany
     @JoinTable(
-            name = "post_tag",
-            joinColumns = @JoinColumn(name = "post_id"),
+            name = "publication_tag",
+            joinColumns = @JoinColumn(name = "publication_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags;
@@ -50,12 +56,18 @@ public class Publication {
     private Set<Reaction> reactions;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "publication")
+    private Set<Comment> comments;
+
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "state_id")
+    @Enumerated(EnumType.STRING)
     private State state;
 
+
 }
+
+

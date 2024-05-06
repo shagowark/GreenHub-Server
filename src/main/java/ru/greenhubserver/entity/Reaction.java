@@ -22,11 +22,6 @@ public class Reaction {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToMany
-    @JoinTable(
-            name = "reaction_type",
-            joinColumns = @JoinColumn(name = "reaction_id"),
-            inverseJoinColumns = @JoinColumn(name = "type_id")
-    )
-    private Set<ReactionType> reactionType;
+    @Enumerated(EnumType.STRING)
+    private ReactionType reactionType;
 }

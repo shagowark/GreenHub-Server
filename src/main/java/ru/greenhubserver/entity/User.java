@@ -31,7 +31,7 @@ public class User {
 
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "image_id")
-    private Image imageId;
+    private Image image;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
@@ -61,7 +61,6 @@ public class User {
     )
     private Set<Role> achievements;
 
-    @ManyToOne
-    @JoinColumn(name = "state_id")
+    @Enumerated(EnumType.STRING)
     private State state;
 }

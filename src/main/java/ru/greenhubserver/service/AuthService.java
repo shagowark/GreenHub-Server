@@ -11,7 +11,7 @@ import ru.greenhubserver.dto.controller.IdDto;
 import ru.greenhubserver.dto.security.JwtRequestDto;
 import ru.greenhubserver.dto.security.JwtResponseDto;
 import ru.greenhubserver.dto.security.RegistrationUserDto;
-import ru.greenhubserver.exceptions.UserAlreadyExistsException;
+import ru.greenhubserver.exceptions.BadRequestException;
 import ru.greenhubserver.utils.JwtTokenUtils;
 
 @Service
@@ -31,7 +31,7 @@ public class AuthService {
 
     public IdDto createNewUser(@RequestBody RegistrationUserDto registrationUserDto) {
         if (userService.findByUserName(registrationUserDto.getUsername()).isPresent()) {
-            throw new UserAlreadyExistsException("User already exists");
+            throw new BadRequestException("User already exists");
         }
         return new IdDto(userService.createNewUser(registrationUserDto).getId());
     }

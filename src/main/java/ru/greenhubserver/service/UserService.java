@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.greenhubserver.dto.security.RegistrationUserDto;
 import ru.greenhubserver.entity.User;
+import ru.greenhubserver.exceptions.NotFoundException;
 import ru.greenhubserver.repository.UserRepository;
 
 import java.util.Optional;
@@ -24,6 +25,10 @@ public class UserService implements UserDetailsService {
 
     public Optional<User> findByUserName(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    public User findById(Long id) {
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     @Override
