@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.greenhubserver.dto.controller.PublicationDtoRequest;
 import ru.greenhubserver.dto.controller.PublicationDtoResponse;
+import ru.greenhubserver.dto.controller.UserSmallDto;
 import ru.greenhubserver.entity.*;
+import ru.greenhubserver.exceptions.NoRightsException;
 import ru.greenhubserver.exceptions.NotFoundException;
 import ru.greenhubserver.repository.PublicationRepository;
 
@@ -23,6 +25,7 @@ public class PublicationService {
     private final UserService userService;
     private final TagService tagService;
     private final ImageService imageService;
+    private final RoleService roleService;
 
 
     public void savePublication(PublicationDtoRequest publicationDtoRequest, Principal principal) {
@@ -47,7 +50,7 @@ public class PublicationService {
         publicationRepository.save(publication);
     }
 
-    public void savePublication(Publication publication){
+    public void savePublication(Publication publication) {
         publicationRepository.save(publication);
     }
 
@@ -62,7 +65,13 @@ public class PublicationService {
         return new PageImpl<>(publicationToDto(found));
     }
 
-    public void deletePublication(Long id) {
+    public void deletePublication(Long id, Principal principal) {
+        User user = userService.findByUserName(principal.getName()).orElseThrow(() -> new NotFoundException("User not found"));
+        if (!findPublicationById(id).getUser().equals(user)
+                || user.getRoles().contains(roleService.getModeratorRole())
+                || user.getRoles().contains(roleService.getAdminRole())) {
+            throw new NoRightsException("Cannot delete other's publication if you're not amin or moder");
+        }
         publicationRepository.deleteById(id);
     }
 
@@ -78,7 +87,7 @@ public class PublicationService {
         );
     }
 
-    private List<PublicationDtoResponse> publicationToDto(Page<Publication> found){
+    private List<PublicationDtoResponse> publicationToDto(Page<Publication> found) {
         List<PublicationDtoResponse> res = new ArrayList<>();
         for (Publication entity : found) {
             if (entity.getState() == State.BANNED) continue;
@@ -90,9 +99,10 @@ public class PublicationService {
                     .image(imageCloudService.getImage(entity.getImage().getName()))
                     .rating(entity.getRating())
                     .commentsCount(entity.getCommentsCount())
-                    .authorId(entity.getUser().getId())
-                    .authorName(entity.getUser().getUsername())
-                    .authorImage(imageCloudService.getImage(entity.getUser().getImage().getName()))
+                    .author(UserSmallDto.builder()
+                            .userId(entity.getUser().getId())
+                            .username(entity.getUser().getUsername())
+                            .userImage(imageCloudService.getImage(entity.getUser().getImage().getName())).build())
                     .build();
 
             res.add(dto);

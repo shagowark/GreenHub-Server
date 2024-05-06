@@ -12,8 +12,9 @@ public class Achievement {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "image_url")
-    private String imageURL;
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "image_id")
+    private Image image;
 
     @Column(name = "name", nullable = false)
     private String name;

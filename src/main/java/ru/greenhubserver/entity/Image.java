@@ -26,5 +26,9 @@ public class Image {
 
     @JsonIgnore
     @OneToOne(mappedBy = "image", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    private Achievement achievement;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "image", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     private Publication publication;
 }

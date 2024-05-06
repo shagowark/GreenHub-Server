@@ -59,8 +59,19 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "achievement_id")
     )
-    private Set<Role> achievements;
+    private Set<Achievement> achievements;
 
     @Enumerated(EnumType.STRING)
     private State state;
+
+    @ManyToMany
+    @JoinTable(
+            name = "subscriptions",
+            joinColumns = @JoinColumn(name = "target_id"),
+            inverseJoinColumns = @JoinColumn(name = "subscriber_id")
+    )
+    private Set<User> subscribers;
+
+    @ManyToMany(mappedBy = "subscribers")
+    private Set<User> subscriptions;
 }

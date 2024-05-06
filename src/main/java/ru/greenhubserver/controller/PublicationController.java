@@ -6,10 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import org.w3c.dom.Text;
 import ru.greenhubserver.dto.controller.*;
-import ru.greenhubserver.entity.Comment;
-import ru.greenhubserver.entity.ReactionType;
 import ru.greenhubserver.service.CommentService;
 import ru.greenhubserver.service.PublicationService;
 import ru.greenhubserver.service.ReactionService;
@@ -18,6 +15,7 @@ import java.security.Principal;
 import java.util.Set;
 
 //TODO swagger
+// htpps
 
 @RestController
 @RequiredArgsConstructor
@@ -49,11 +47,11 @@ public class PublicationController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePublicationById(@PathVariable Long id) {
-        publicationService.deletePublication(id);
+    public void deletePublicationById(@PathVariable Long id, Principal principal) {
+        publicationService.deletePublication(id, principal);
     }
 
-    @PatchMapping("/{id}")
+    @PostMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Secured({"ROLE_ADMIN", "ROLE_MODERATOR"})
     public void banPublication(@PathVariable Long id) {
