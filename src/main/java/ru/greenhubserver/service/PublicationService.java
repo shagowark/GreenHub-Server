@@ -45,6 +45,7 @@ public class PublicationService {
                 .commentsCount(0L)
                 .reactions(new HashSet<>())
                 .user(userService.findByUserName(principal.getName()).orElse(null))
+                .state(State.VISIBLE)
                 .build();
 
         publicationRepository.save(publication);

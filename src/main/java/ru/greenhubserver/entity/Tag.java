@@ -2,6 +2,10 @@ package ru.greenhubserver.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.util.Set;
 
 @Entity
 @Data
@@ -15,4 +19,9 @@ public class Tag {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @ManyToMany(mappedBy = "tags")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Publication> publications;
 }

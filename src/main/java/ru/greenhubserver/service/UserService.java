@@ -8,13 +8,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.greenhubserver.dto.controller.AchievementDto;
 import ru.greenhubserver.dto.controller.UserBigDto;
 import ru.greenhubserver.dto.controller.UserChangesDto;
 import ru.greenhubserver.dto.controller.UserSmallDto;
 import ru.greenhubserver.dto.security.RegistrationUserDto;
-import ru.greenhubserver.entity.Image;
-import ru.greenhubserver.entity.State;
-import ru.greenhubserver.entity.User;
+import ru.greenhubserver.entity.*;
+import ru.greenhubserver.exceptions.BadRequestException;
 import ru.greenhubserver.exceptions.NoRightsException;
 import ru.greenhubserver.exceptions.NotFoundException;
 import ru.greenhubserver.repository.UserRepository;
@@ -33,8 +33,9 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final ImageCloudService imageCloudService;
     private final ImageService imageService;
+    private final AchievementService achievementService;
 
-    public Optional<User> findByUserName(String username) {
+    public Optional<User> findByUserName(String username) { // TODO переделать на выкидывание ошибки
         return userRepository.findByUsername(username);
     }
 
@@ -63,6 +64,7 @@ public class UserService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(registrationUserDto.getPassword()));
         user.setEmail(registrationUserDto.getEmail());
         user.setRoles(Set.of(roleService.getUserRole()));
+        user.setState(State.VISIBLE);
         return userRepository.save(user);
     }
 
@@ -132,6 +134,23 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    // achievements
-    // upgrade user
+    public Set<AchievementDto> getUserAchievements(Long id) {
+        User user = findById(id);
+        return user.getAchievements().stream().map(x ->
+                AchievementDto.builder()
+                        .id(x.getId())
+                        .name(x.getName())
+                        .image(imageCloudService.getImage(x.getImage().getName()))
+                        .build())
+                .collect(Collectors.toSet());
+    }
+
+    public void editUserAchievements(Long id, Set<String> achievements) {
+        User user = findById(id);
+        user.setAchievements(
+                achievements.stream().map(achievementService::findByName).collect(Collectors.toSet())
+        );
+        userRepository.save(user);
+    }
+
 }
