@@ -23,46 +23,77 @@ public class UserController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserBigDto getUser(@PathVariable Long id) {
+    public UserBigDto getUser(@PathVariable Long id,
+                              Principal principal) {
+        userService.checkIfUserBanned(principal);
         return userService.getUser(id);
     }
 
     @GetMapping("/{id}/subscriptions")
     @ResponseStatus(HttpStatus.OK)
-    public Set<UserSmallDto> getSubscriptions(@PathVariable Long id) {
+    public Set<UserSmallDto> getSubscriptions(@PathVariable Long id,
+                                              Principal principal) {
+        userService.checkIfUserBanned(principal);
         return userService.getUserSubscriptions(id);
     }
 
     @GetMapping("/{id}/subscribers")
     @ResponseStatus(HttpStatus.OK)
-    public Set<UserSmallDto> getSubscribers(@PathVariable Long id) {
+    public Set<UserSmallDto> getSubscribers(@PathVariable Long id,
+                                            Principal principal) {
+        userService.checkIfUserBanned(principal);
         return userService.getUserSubscribers(id);
     }
 
     @PostMapping("/{id}/ban")
     @ResponseStatus(HttpStatus.OK)
     @Secured({"ROLE_ADMIN", "ROLE_MODERATOR"})
-    public void banUser(@PathVariable Long id) {
-        userService.banUser(id);
+    public void banUser(@PathVariable Long id,
+                        Principal principal) {
+        userService.checkIfUserBanned(principal);
+        userService.banUser(id, principal);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void editUser(@PathVariable Long id, UserChangesDto dto, Principal principal) {
+    public void editUser(@PathVariable Long id, UserChangesDto dto,
+                         Principal principal) {
+        userService.checkIfUserBanned(principal);
         userService.editUser(id, dto, principal);
     }
 
     @GetMapping("/{id}/achievements")
     @ResponseStatus(HttpStatus.OK)
-    public Set<AchievementDto> getUserAchievements(@PathVariable Long id) {
+    public Set<AchievementDto> getUserAchievements(@PathVariable Long id,
+                                                   Principal principal) {
+        userService.checkIfUserBanned(principal);
         return userService.getUserAchievements(id);
     }
 
     @PatchMapping("/{id}/achievements")
     @ResponseStatus(HttpStatus.OK)
     @Secured({"ROLE_ADMIN", "ROLE_MODERATOR"})
-    public void editUserAchievements(@PathVariable Long id, @RequestBody Set<String> achievements) {
+    public void editUserAchievements(@PathVariable Long id,
+                                     @RequestBody Set<String> achievements,
+                                     Principal principal) {
+        userService.checkIfUserBanned(principal);
         userService.editUserAchievements(id, achievements);
+    }
+
+    @PostMapping("/{id}/subscribe")
+    @ResponseStatus(HttpStatus.OK)
+    public void subscribeToUser(@PathVariable Long id,
+                                Principal principal) {
+        userService.checkIfUserBanned(principal);
+        userService.subscribeToUser(id, principal);
+    }
+
+    @PostMapping("/{id}/unsubscribe")
+    @ResponseStatus(HttpStatus.OK)
+    public void unsubscribeToUser(@PathVariable Long id,
+                                  Principal principal) {
+        userService.checkIfUserBanned(principal);
+        userService.unsubscribeToUser(id, principal);
     }
 
 

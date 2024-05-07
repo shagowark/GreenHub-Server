@@ -35,8 +35,8 @@ public class UserService implements UserDetailsService {
     private final ImageService imageService;
     private final AchievementService achievementService;
 
-    public Optional<User> findByUserName(String username) { // TODO переделать на выкидывание ошибки
-        return userRepository.findByUsername(username);
+    public User findByUserName(String username) {
+        return userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
     }
 
     public User findById(Long id) {
@@ -45,9 +45,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUserName(username).orElseThrow(() -> new UsernameNotFoundException(
-                String.format("Username '%s' not found", username)
-        ));
+        User user = findByUserName(username);
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
@@ -108,15 +106,18 @@ public class UserService implements UserDetailsService {
         return res;
     }
 
-    public void banUser(Long id) {
-        User user = findById(id);
-        user.setState(State.BANNED);
-        userRepository.save(user);
+    public void banUser(Long id, Principal principal) {
+        User target = findById(id);
+        User user =findByUserName(principal.getName());
+        if (user.equals(target)) throw new BadRequestException("Cannot ban yourself");
+        target.setState(State.BANNED);
+        target.getPublications().forEach(x -> x.setState(State.BANNED));
+        userRepository.save(target);
     }
 
     public void editUser(Long id, UserChangesDto dto, Principal principal) {
-        User user = findByUserName(principal.getName()).orElseThrow(() -> new NotFoundException("User not found"));
-        if (!user.getId().equals(id)){
+        User user = findByUserName(principal.getName());
+        if (!user.getId().equals(id)) {
             throw new NoRightsException("Cannot change other's profile");
         }
         if (dto.getImage() != null) {
@@ -128,7 +129,7 @@ public class UserService implements UserDetailsService {
 
             user.setImage(image);
         }
-        if (dto.getEmail() != null){
+        if (dto.getEmail() != null) {
             user.setEmail(dto.getEmail());
         }
         userRepository.save(user);
@@ -137,11 +138,11 @@ public class UserService implements UserDetailsService {
     public Set<AchievementDto> getUserAchievements(Long id) {
         User user = findById(id);
         return user.getAchievements().stream().map(x ->
-                AchievementDto.builder()
-                        .id(x.getId())
-                        .name(x.getName())
-                        .image(imageCloudService.getImage(x.getImage().getName()))
-                        .build())
+                        AchievementDto.builder()
+                                .id(x.getId())
+                                .name(x.getName())
+                                .image(imageCloudService.getImage(x.getImage().getName()))
+                                .build())
                 .collect(Collectors.toSet());
     }
 
@@ -153,4 +154,36 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    public void subscribeToUser(Long id, Principal principal) {
+        User target = findById(id);
+        User user = findByUserName(principal.getName());
+
+        if (user.equals(target)) throw new BadRequestException("Cannot subscribe to yourself");
+        if (user.getSubscriptions().contains(target)) throw new BadRequestException("Cannot subscribe twice");
+
+        target.getSubscribers().add(user);
+        user.getSubscriptions().add(target);
+        userRepository.save(user);
+        userRepository.save(target);
+    }
+
+    public void unsubscribeToUser(Long id, Principal principal) {
+        User target = findById(id);
+        User user = findByUserName(principal.getName());
+
+        if (user.equals(target)) throw new BadRequestException("Cannot unsubscribe from yourself");
+        if (!user.getSubscriptions().contains(target)) throw new BadRequestException("Cannot unsubscribe twice");
+
+        target.getSubscribers().remove(user);
+        user.getSubscriptions().remove(target);
+        userRepository.save(user);
+        userRepository.save(target);
+    }
+
+    public void checkIfUserBanned(Principal principal){
+        User user = findByUserName(principal.getName());
+        if (user.getState() == State.BANNED) {
+            throw new NoRightsException("User is banned");
+        }
+    }
 }

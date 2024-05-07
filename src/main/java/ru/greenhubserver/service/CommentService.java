@@ -26,7 +26,7 @@ public class CommentService {
 
 
     public void saveComment(Long publicationId, String text, Principal principal) {
-        User user = userService.findByUserName(principal.getName()).orElseThrow(() -> new NotFoundException("User not found"));
+        User user = userService.findByUserName(principal.getName());
         Publication publication = publicationService.findPublicationById(publicationId);
         Comment comment = new Comment();
         comment.setText(text);

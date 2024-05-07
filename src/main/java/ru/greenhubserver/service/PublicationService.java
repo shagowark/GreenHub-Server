@@ -44,7 +44,7 @@ public class PublicationService {
                 .rating(0L)
                 .commentsCount(0L)
                 .reactions(new HashSet<>())
-                .user(userService.findByUserName(principal.getName()).orElse(null))
+                .user(userService.findByUserName(principal.getName()))
                 .state(State.VISIBLE)
                 .build();
 
@@ -67,7 +67,7 @@ public class PublicationService {
     }
 
     public void deletePublication(Long id, Principal principal) {
-        User user = userService.findByUserName(principal.getName()).orElseThrow(() -> new NotFoundException("User not found"));
+        User user = userService.findByUserName(principal.getName());
         if (!findPublicationById(id).getUser().equals(user)
                 || user.getRoles().contains(roleService.getModeratorRole())
                 || user.getRoles().contains(roleService.getAdminRole())) {
