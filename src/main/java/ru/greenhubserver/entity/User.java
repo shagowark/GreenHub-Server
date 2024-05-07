@@ -11,8 +11,6 @@ import java.util.Set;
 @Entity
 @Data
 @Table(name = "users")
-@ToString(exclude = {"comments", "posts", "reaction"})
-@EqualsAndHashCode(exclude = {"comments", "posts", "reaction"})
 public class User {
 
     @Id
@@ -29,20 +27,32 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @Enumerated(EnumType.STRING)
+    private State state;
+
+
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "image_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Image image;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Comment> comments;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Reaction> reactions;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Publication> publications;
 
     @ManyToMany
@@ -51,6 +61,8 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Role> roles;
 
     @ManyToMany
@@ -59,8 +71,22 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "achievement_id")
     )
-    private Set<Role> achievements;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Achievement> achievements;
 
-    @Enumerated(EnumType.STRING)
-    private State state;
+    @ManyToMany
+    @JoinTable(
+            name = "subscriptions",
+            joinColumns = @JoinColumn(name = "target_id"),
+            inverseJoinColumns = @JoinColumn(name = "subscriber_id")
+    )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<User> subscribers;
+
+    @ManyToMany(mappedBy = "subscribers")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<User> subscriptions;
 }

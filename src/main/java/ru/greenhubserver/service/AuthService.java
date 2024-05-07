@@ -30,9 +30,11 @@ public class AuthService {
     }
 
     public IdDto createNewUser(@RequestBody RegistrationUserDto registrationUserDto) {
-        if (userService.findByUserName(registrationUserDto.getUsername()).isPresent()) {
-            throw new BadRequestException("User already exists");
+        try {
+            userService.findByUserName(registrationUserDto.getUsername());
+        } catch (Exception ignored){
+            return new IdDto(userService.createNewUser(registrationUserDto).getId());
         }
-        return new IdDto(userService.createNewUser(registrationUserDto).getId());
+        throw new BadRequestException("User already exists");
     }
 }

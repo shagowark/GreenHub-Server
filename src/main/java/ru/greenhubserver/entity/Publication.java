@@ -14,8 +14,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "publication")
-@ToString(exclude = {"tags", "reactions"})
-@EqualsAndHashCode(exclude = {"tags", "reactions"})
 public class Publication {
 
     @Id
@@ -35,13 +33,18 @@ public class Publication {
     @Column(name = "comments_count")
     private Long commentsCount;
 
-    @OneToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "image_id")
-    private Image image;
-
     @Column(name = "created_time", nullable = false)
     @CreationTimestamp
     private Instant createdTime;
+
+    @Enumerated(EnumType.STRING)
+    private State state;
+
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "image_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Image image;
 
     @ManyToMany
     @JoinTable(
@@ -49,23 +52,26 @@ public class Publication {
             joinColumns = @JoinColumn(name = "publication_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Tag> tags;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "publication")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Reaction> reactions;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "publication")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<Comment> comments;
 
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    private State state;
 
 
 }

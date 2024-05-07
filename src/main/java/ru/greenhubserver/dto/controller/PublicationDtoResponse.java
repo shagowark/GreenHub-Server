@@ -14,7 +14,5 @@ public class PublicationDtoResponse {
     private Set<String> tags;
     private Long rating;
     private Long commentsCount;
-    private Long authorId;
-    private byte[] authorImage;
-    private String authorName;
+    private UserSmallDto author;
 }

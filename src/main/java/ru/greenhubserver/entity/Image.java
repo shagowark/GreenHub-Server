@@ -1,11 +1,11 @@
 package ru.greenhubserver.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
-import java.time.Instant;
+import java.util.Set;
 
 @Entity
 @Data
@@ -20,11 +20,18 @@ public class Image {
     @Column(name = "name")
     private String name;
 
-    @JsonIgnore
-    @OneToOne(mappedBy = "image", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
-    private User user;
+    @OneToMany(mappedBy = "image", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<User> user;
 
-    @JsonIgnore
     @OneToOne(mappedBy = "image", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Achievement achievement;
+
+    @OneToOne(mappedBy = "image", fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Publication publication;
 }

@@ -2,6 +2,8 @@ package ru.greenhubserver.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.Set;
 
@@ -14,14 +16,19 @@ public class Reaction {
     @Column(name = "id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private ReactionType reactionType;
+
     @ManyToOne
     @JoinColumn(name = "publication_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Publication publication;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    private ReactionType reactionType;
 }
