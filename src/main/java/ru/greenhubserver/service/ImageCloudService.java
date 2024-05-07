@@ -1,6 +1,7 @@
 package ru.greenhubserver.service;
 
 import io.minio.*;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
@@ -10,6 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.greenhubserver.exceptions.BadRequestException;
 import ru.greenhubserver.exceptions.NotFoundException;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 
 @Service
@@ -20,10 +23,30 @@ public class ImageCloudService {
     @Value("${minio.bucket}")
     private String bucketName;
 
+    @Value("${minio.defaultImagePath}")
+    private String defaultImagePath;
+
+    @Value("${minio.defaultImageName}")
+    private String defaultImageName;
+
+    @PostConstruct
+    private void saveDefaultImage(){
+        createBucket();
+        File file = new File(defaultImagePath);
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .stream(inputStream, inputStream.available(), -1)
+                    .bucket(bucketName)
+                    .object(defaultImageName)
+                    .build());
+        } catch (Exception e) {
+            throw new BadRequestException("Image upload exception");
+        }
+    }
+
     public void saveImage(MultipartFile file, String name) {
-        try {
-            createBucket();
-            InputStream inputStream = file.getInputStream();
+        try (InputStream inputStream = file.getInputStream()){
+//            createBucket();
             minioClient.putObject(PutObjectArgs.builder()
                     .stream(inputStream, inputStream.available(), -1)
                     .bucket(bucketName)
@@ -51,15 +74,18 @@ public class ImageCloudService {
                 .substring(file.getOriginalFilename().lastIndexOf("."));
     }
 
-    @SneakyThrows
     private void createBucket() {
-        boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
-                .bucket(bucketName)
-                .build());
-        if (!found) {
-            minioClient.makeBucket(MakeBucketArgs.builder()
+        try {
+            boolean found = minioClient.bucketExists(BucketExistsArgs.builder()
                     .bucket(bucketName)
                     .build());
+            if (!found) {
+                minioClient.makeBucket(MakeBucketArgs.builder()
+                        .bucket(bucketName)
+                        .build());
+            }
+        } catch (Exception e) {
+            throw new BadRequestException("Image upload exception");
         }
     }
 }

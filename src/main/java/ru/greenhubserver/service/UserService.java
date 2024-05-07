@@ -2,6 +2,7 @@ package ru.greenhubserver.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -63,6 +64,7 @@ public class UserService implements UserDetailsService {
         user.setEmail(registrationUserDto.getEmail());
         user.setRoles(Set.of(roleService.getUserRole()));
         user.setState(State.VISIBLE);
+        user.setImage(imageService.findById(1L)); // default image id
         return userRepository.save(user);
     }
 
@@ -177,6 +179,28 @@ public class UserService implements UserDetailsService {
         target.getSubscribers().remove(user);
         user.getSubscriptions().remove(target);
         userRepository.save(user);
+        userRepository.save(target);
+    }
+
+    public void upgradeUser(Long id, Principal principal) {
+        User target = findById(id);
+        User user = findByUserName(principal.getName());
+
+        if (user.equals(target)) throw new BadRequestException("Cannot upgrade yourself");
+        if (target.getRoles().contains(roleService.getModeratorRole())) throw new BadRequestException("User is already a moderator");
+
+        target.getRoles().add(roleService.getModeratorRole());
+        userRepository.save(target);
+    }
+
+    public void downgradeUser(Long id, Principal principal) {
+        User target = findById(id);
+        User user = findByUserName(principal.getName());
+
+        if (user.equals(target)) throw new BadRequestException("Cannot downgrade yourself");
+        if (!target.getRoles().contains(roleService.getModeratorRole())) throw new BadRequestException("User is not a moderator");
+
+        target.getRoles().remove(roleService.getModeratorRole());
         userRepository.save(target);
     }
 

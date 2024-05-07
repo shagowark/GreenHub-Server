@@ -31,7 +31,7 @@ public class User {
     private State state;
 
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "image_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

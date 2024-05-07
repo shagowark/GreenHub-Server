@@ -96,5 +96,21 @@ public class UserController {
         userService.unsubscribeToUser(id, principal);
     }
 
+    @PostMapping("/{id}/upgrade")
+    @ResponseStatus(HttpStatus.OK)
+    @Secured({"ROLE_ADMIN"})
+    public void upgradeUser(@PathVariable Long id,
+                            Principal principal) {
+        userService.checkIfUserBanned(principal);
+        userService.upgradeUser(id, principal);
+    }
 
+    @PostMapping("/{id}/downgrade")
+    @ResponseStatus(HttpStatus.OK)
+    @Secured({"ROLE_ADMIN"})
+    public void downgradeUser(@PathVariable Long id,
+                              Principal principal) {
+        userService.checkIfUserBanned(principal);
+        userService.downgradeUser(id, principal);
+    }
 }

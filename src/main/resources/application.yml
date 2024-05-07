@@ -24,3 +24,5 @@ minio:
   url: ${MINIO_URL}
   accessKey: ${MINIO_ACCESS_KEY}
   secretKey: ${MINIO_SECRET_KEY}
+  defaultImagePath: ${MINIO_DEFAULT_IMAGE_PATH}
+  defaultImageName: ${MINIO_DEFAULT_IMAGE_NAME}
