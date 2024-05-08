@@ -21,7 +21,7 @@ public class AuthService {
     private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
 
-    public JwtResponseDto createAuthToken(@RequestBody JwtRequestDto authRequest) {
+    public JwtResponseDto createAuthToken(JwtRequestDto authRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 authRequest.getUsername(), authRequest.getPassword()));
         UserDetails userDetails = userService.loadUserByUsername(authRequest.getUsername());
@@ -29,12 +29,16 @@ public class AuthService {
         return new JwtResponseDto(token);
     }
 
-    public IdDto createNewUser(@RequestBody RegistrationUserDto registrationUserDto) {
+    public IdDto createNewUser(RegistrationUserDto registrationUserDto) {
         try {
             userService.findByUserName(registrationUserDto.getUsername());
         } catch (Exception ignored){
             return new IdDto(userService.createNewUser(registrationUserDto).getId());
         }
         throw new BadRequestException("User already exists");
+    }
+
+    public JwtResponseDto createAuthToken(RegistrationUserDto registrationUserDto) {
+        return createAuthToken(new JwtRequestDto(registrationUserDto.getUsername(), registrationUserDto.getPassword()));
     }
 }

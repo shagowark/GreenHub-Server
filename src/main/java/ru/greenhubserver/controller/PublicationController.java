@@ -1,5 +1,9 @@
 package ru.greenhubserver.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,13 +19,14 @@ import ru.greenhubserver.service.UserService;
 import java.security.Principal;
 import java.util.Set;
 
-//TODO swagger
-// htpps
+// TODO dockerfile
+// TODO tests
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/publications")
-@Secured({"ROLE_USER", "ROLE_ADMIN", "ROLE_MODERATOR"})
+@Tag(name = "API публикаций", description = "Предоставляет эндпоинты для взаимодействия с публикациями." +
+        " Все эндпоинты кроме GET /publications - защищены, пускают только авторизованных пользователей")
 public class PublicationController {
 
     private final PublicationService publicationService;
@@ -31,15 +36,20 @@ public class PublicationController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Возвращает все публикации, доступно в том числе для неавторизованных запросов")
     public Page<PublicationDtoResponse> getPublications(Pageable pageable,
                                                         @RequestParam(required = false) Set<String> tags,
-                                                        Principal principal) {
-        userService.checkIfUserBanned(principal);
+                                                        Principal principal
+    ) {
+        if (principal != null) {
+            userService.checkIfUserBanned(principal);
+        }
         return publicationService.findPublications(pageable, tags);
     }
 
     @GetMapping("/user/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Возвращает список всех публикаций определенного пользователя")
     public Page<PublicationDtoResponse> getPublicationsByUser(@PathVariable Long id,
                                                               Pageable pageable,
                                                               Principal principal) {
@@ -49,6 +59,7 @@ public class PublicationController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Добавляет публикацию")
     public void postPublication(@ModelAttribute PublicationDtoRequest publicationDtoRequest,
                                 Principal principal) {
         userService.checkIfUserBanned(principal);
@@ -57,6 +68,7 @@ public class PublicationController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Удаляет публикацию")
     public void deletePublicationById(@PathVariable Long id,
                                       Principal principal) {
         userService.checkIfUserBanned(principal);
@@ -66,6 +78,7 @@ public class PublicationController {
     @PostMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Secured({"ROLE_ADMIN", "ROLE_MODERATOR"})
+    @Operation(summary = "Банит публикацию, доступно только модератору и администратору")
     public void banPublication(@PathVariable Long id,
                                Principal principal) {
         userService.checkIfUserBanned(principal);
@@ -74,6 +87,7 @@ public class PublicationController {
 
     @PostMapping("/{id}/reactions")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Добавляет реакцию на публикацию")
     public void postReaction(@PathVariable Long id,
                              @RequestBody ReactionTypeDto reactionType,
                              Principal principal) {
@@ -83,6 +97,7 @@ public class PublicationController {
 
     @DeleteMapping("/{id}/reactions")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Удаляет реакцию на публикацию")
     public void deleteReaction(@PathVariable Long id,
                                Principal principal) {
         userService.checkIfUserBanned(principal);
@@ -91,7 +106,8 @@ public class PublicationController {
 
     @GetMapping("/{id}/comments")
     @ResponseStatus(HttpStatus.OK)
-    public Page<CommentDto> postComment(@PathVariable Long id,
+    @Operation(summary = "Возвращает все комментарии к публикации")
+    public Page<CommentDto> getComments(@PathVariable Long id,
                                         Pageable pageable,
                                         Principal principal) {
         userService.checkIfUserBanned(principal);
@@ -100,6 +116,7 @@ public class PublicationController {
 
     @PostMapping("/{id}/comments")
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Удаляет реакцию на публикацию")
     public void postComment(@PathVariable Long id,
                             @RequestBody TextDto textDto,
                             Principal principal) {
