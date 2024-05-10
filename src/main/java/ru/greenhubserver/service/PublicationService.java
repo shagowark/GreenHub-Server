@@ -29,11 +29,14 @@ public class PublicationService {
 
 
     public void savePublication(PublicationDtoRequest publicationDtoRequest, Principal principal) {
-        Image image = new Image();
-        image = imageService.save(image);
-        image.setName(imageCloudService.generateFileName(image.getId(), publicationDtoRequest.getImage()));
-        imageService.save(image);
-        imageCloudService.saveImage(publicationDtoRequest.getImage(), image.getName());
+        Image image = null;
+        if (publicationDtoRequest.getImage() != null) {
+            image = new Image();
+            image = imageService.save(image);
+            image.setName(imageCloudService.generateFileName(image.getId(), publicationDtoRequest.getImage()));
+            imageService.save(image);
+            imageCloudService.saveImage(publicationDtoRequest.getImage(), image.getName());
+        }
 
         Publication publication = Publication.builder()
                 .image(image)
@@ -44,7 +47,7 @@ public class PublicationService {
                 .rating(0L)
                 .commentsCount(0L)
                 .reactions(new HashSet<>())
-                .user(userService.findByUserName(principal.getName()))
+                .user(userService.findByUsername(principal.getName()))
                 .state(State.VISIBLE)
                 .build();
 
@@ -67,7 +70,7 @@ public class PublicationService {
     }
 
     public void deletePublication(Long id, Principal principal) {
-        User user = userService.findByUserName(principal.getName());
+        User user = userService.findByUsername(principal.getName());
         if (!findPublicationById(id).getUser().equals(user)
                 || user.getRoles().contains(roleService.getModeratorRole())
                 || user.getRoles().contains(roleService.getAdminRole())) {
@@ -97,7 +100,7 @@ public class PublicationService {
                     .title(entity.getTitle())
                     .text(entity.getText())
                     .tags(entity.getTags().stream().map(Tag::getName).collect(Collectors.toSet()))
-                    .image(imageCloudService.getImage(entity.getImage().getName()))
+                    .image(entity.getImage() != null ? imageCloudService.getImage(entity.getImage().getName()) : null)
                     .rating(entity.getRating())
                     .commentsCount(entity.getCommentsCount())
                     .author(UserSmallDto.builder()

@@ -21,7 +21,7 @@ public class ReactionService {
 
     public void saveReaction(Long publicationId, String reactionTypeStr, Principal principal) {
         ReactionType reactionType = ReactionType.valueOf(reactionTypeStr);
-        User user = userService.findByUserName(principal.getName());
+        User user = userService.findByUsername(principal.getName());
         Publication publication = publicationService.findPublicationById(publicationId);
         Reaction reaction = findByPublicationIdAndUserId(publication, user).orElse(null);
         if (reaction != null) {
@@ -54,7 +54,7 @@ public class ReactionService {
     }
 
     public void deleteReaction(Long publicationId, Principal principal) {
-        User user = userService.findByUserName(principal.getName());
+        User user = userService.findByUsername(principal.getName());
         Publication publication = publicationService.findPublicationById(publicationId);
         Reaction reaction = findByPublicationIdAndUserId(publication, user).orElseThrow(() -> new NotFoundException("Reaction not found"));
         if (reaction.getReactionType() == ReactionType.LIKE) {

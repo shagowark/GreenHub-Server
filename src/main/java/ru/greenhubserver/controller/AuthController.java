@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.greenhubserver.dto.controller.IdDto;
 import ru.greenhubserver.dto.security.JwtRequestDto;
 import ru.greenhubserver.dto.security.JwtResponseDto;
 import ru.greenhubserver.dto.security.RegistrationUserDto;
@@ -16,21 +15,23 @@ import ru.greenhubserver.service.AuthService;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "API аутентификации", description = "Позволяет регистрироваться и авторизовываться, используя технологии JWT токенов")
+@Tag(name = "API аутентификации", description = "Предоставляет эндпоинты для регистрации и авторизации, в обоих случаях возвращает JWT токен")
 public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/auth")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Регистрирует нового пользователя")
+    @Operation(summary = "Авторизует пользователя (возвращает JWT токен)")
     public JwtResponseDto authentication(@RequestBody JwtRequestDto authRequest) {
         return authService.createAuthToken(authRequest);
     }
 
     @PostMapping(value = "/registration")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Авторизует пользователя (возвращает JWT токен)")
-    public IdDto registration(@RequestBody RegistrationUserDto registrationUserDto) {
-        return authService.createNewUser(registrationUserDto);
+    @Operation(summary = "Регистрирует нового пользователя")
+    public JwtResponseDto registration(@RequestBody RegistrationUserDto registrationUserDto) {
+        authService.createNewUser(registrationUserDto);
+        return authService.createAuthToken(registrationUserDto);
     }
+
 }

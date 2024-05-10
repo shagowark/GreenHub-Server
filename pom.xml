@@ -20,6 +20,9 @@
         <swagger.version>2.2.0</swagger.version>
         <jjwt.version>0.12.3</jjwt.version>
         <minio.version>8.5.10</minio.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     <dependencies>
         <dependency>
