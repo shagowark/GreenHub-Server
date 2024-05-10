@@ -1,8 +1,6 @@
 package ru.greenhubserver.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,9 +22,6 @@ public class AuthController {
     @PostMapping("/auth")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Авторизует пользователя (возвращает JWT токен)")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "401", description = "Неверный логин/пароль", content = @io.swagger.v3.oas.annotations.media.Content)
-//    })
     public JwtResponseDto authentication(@RequestBody JwtRequestDto authRequest) {
         return authService.createAuthToken(authRequest);
     }

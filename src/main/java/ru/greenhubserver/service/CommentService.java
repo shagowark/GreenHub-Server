@@ -9,7 +9,6 @@ import ru.greenhubserver.dto.controller.CommentDto;
 import ru.greenhubserver.entity.Comment;
 import ru.greenhubserver.entity.Publication;
 import ru.greenhubserver.entity.User;
-import ru.greenhubserver.exceptions.NotFoundException;
 import ru.greenhubserver.repository.CommentRepository;
 
 import java.security.Principal;
@@ -26,7 +25,7 @@ public class CommentService {
 
 
     public void saveComment(Long publicationId, String text, Principal principal) {
-        User user = userService.findByUserName(principal.getName());
+        User user = userService.findByUsername(principal.getName());
         Publication publication = publicationService.findPublicationById(publicationId);
         Comment comment = new Comment();
         comment.setText(text);

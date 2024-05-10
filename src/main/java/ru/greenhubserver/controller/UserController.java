@@ -10,7 +10,6 @@ import ru.greenhubserver.dto.controller.AchievementDto;
 import ru.greenhubserver.dto.controller.UserBigDto;
 import ru.greenhubserver.dto.controller.UserChangesDto;
 import ru.greenhubserver.dto.controller.UserSmallDto;
-import ru.greenhubserver.entity.Achievement;
 import ru.greenhubserver.service.UserService;
 
 import java.security.Principal;
@@ -24,13 +23,13 @@ import java.util.Set;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/{username}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Возвращает пользователя")
-    public UserBigDto getUser(@PathVariable Long id,
+    public UserBigDto getUser(@PathVariable String username,
                               Principal principal) {
         userService.checkIfUserBanned(principal);
-        return userService.getUser(id);
+        return userService.getUser(username);
     }
 
     @GetMapping("/{id}/subscriptions")

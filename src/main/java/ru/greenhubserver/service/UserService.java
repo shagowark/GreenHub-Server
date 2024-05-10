@@ -2,7 +2,6 @@ package ru.greenhubserver.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,7 +21,6 @@ import ru.greenhubserver.repository.UserRepository;
 
 import java.security.Principal;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,7 +34,7 @@ public class UserService implements UserDetailsService {
     private final ImageService imageService;
     private final AchievementService achievementService;
 
-    public User findByUserName(String username) {
+    public User findByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
     }
 
@@ -46,14 +44,15 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUserName(username);
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.getRoles().stream()
+        User user = findByUsername(username);
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .authorities(user.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getName()))
-                        .toList()
-        );
+                        .toList())
+                .disabled(user.getState() == State.BANNED)
+                .build();
     }
 
     @Transactional
@@ -70,6 +69,18 @@ public class UserService implements UserDetailsService {
 
     public UserBigDto getUser(Long id) {
         User user = findById(id);
+        return UserBigDto.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .image(imageCloudService.getImage(user.getImage().getName()))
+                .subscriptionsCount((long) user.getSubscriptions().size())
+                .subscribersCount((long) user.getSubscribers().size())
+                .build();
+    }
+
+    public UserBigDto getUser(String username) {
+        User user = findByUsername(username);
         return UserBigDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -110,7 +121,7 @@ public class UserService implements UserDetailsService {
 
     public void banUser(Long id, Principal principal) {
         User target = findById(id);
-        User user =findByUserName(principal.getName());
+        User user = findByUsername(principal.getName());
         if (user.equals(target)) throw new BadRequestException("Cannot ban yourself");
         target.setState(State.BANNED);
         target.getPublications().forEach(x -> x.setState(State.BANNED));
@@ -118,7 +129,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void editUser(Long id, UserChangesDto dto, Principal principal) {
-        User user = findByUserName(principal.getName());
+        User user = findByUsername(principal.getName());
         if (!user.getId().equals(id)) {
             throw new NoRightsException("Cannot change other's profile");
         }
@@ -158,7 +169,7 @@ public class UserService implements UserDetailsService {
 
     public void subscribeToUser(Long id, Principal principal) {
         User target = findById(id);
-        User user = findByUserName(principal.getName());
+        User user = findByUsername(principal.getName());
 
         if (user.equals(target)) throw new BadRequestException("Cannot subscribe to yourself");
         if (user.getSubscriptions().contains(target)) throw new BadRequestException("Cannot subscribe twice");
@@ -171,7 +182,7 @@ public class UserService implements UserDetailsService {
 
     public void unsubscribeToUser(Long id, Principal principal) {
         User target = findById(id);
-        User user = findByUserName(principal.getName());
+        User user = findByUsername(principal.getName());
 
         if (user.equals(target)) throw new BadRequestException("Cannot unsubscribe from yourself");
         if (!user.getSubscriptions().contains(target)) throw new BadRequestException("Cannot unsubscribe twice");
@@ -184,10 +195,11 @@ public class UserService implements UserDetailsService {
 
     public void upgradeUser(Long id, Principal principal) {
         User target = findById(id);
-        User user = findByUserName(principal.getName());
+        User user = findByUsername(principal.getName());
 
         if (user.equals(target)) throw new BadRequestException("Cannot upgrade yourself");
-        if (target.getRoles().contains(roleService.getModeratorRole())) throw new BadRequestException("User is already a moderator");
+        if (target.getRoles().contains(roleService.getModeratorRole()))
+            throw new BadRequestException("User is already a moderator");
 
         target.getRoles().add(roleService.getModeratorRole());
         userRepository.save(target);
@@ -195,17 +207,18 @@ public class UserService implements UserDetailsService {
 
     public void downgradeUser(Long id, Principal principal) {
         User target = findById(id);
-        User user = findByUserName(principal.getName());
+        User user = findByUsername(principal.getName());
 
         if (user.equals(target)) throw new BadRequestException("Cannot downgrade yourself");
-        if (!target.getRoles().contains(roleService.getModeratorRole())) throw new BadRequestException("User is not a moderator");
+        if (!target.getRoles().contains(roleService.getModeratorRole()))
+            throw new BadRequestException("User is not a moderator");
 
         target.getRoles().remove(roleService.getModeratorRole());
         userRepository.save(target);
     }
 
-    public void checkIfUserBanned(Principal principal){
-        User user = findByUserName(principal.getName());
+    public void checkIfUserBanned(Principal principal) {
+        User user = findByUsername(principal.getName());
         if (user.getState() == State.BANNED) {
             throw new NoRightsException("User is banned");
         }

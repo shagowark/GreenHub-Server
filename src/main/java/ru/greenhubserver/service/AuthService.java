@@ -6,14 +6,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.greenhubserver.dto.controller.IdDto;
 import ru.greenhubserver.dto.security.JwtRequestDto;
 import ru.greenhubserver.dto.security.JwtResponseDto;
 import ru.greenhubserver.dto.security.RegistrationUserDto;
 import ru.greenhubserver.exceptions.BadRequestException;
 import ru.greenhubserver.utils.JwtTokenUtils;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -31,7 +29,7 @@ public class AuthService {
 
     public IdDto createNewUser(RegistrationUserDto registrationUserDto) {
         try {
-            userService.findByUserName(registrationUserDto.getUsername());
+            userService.findByUsername(registrationUserDto.getUsername());
         } catch (Exception ignored){
             return new IdDto(userService.createNewUser(registrationUserDto).getId());
         }

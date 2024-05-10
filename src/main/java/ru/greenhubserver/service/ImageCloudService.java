@@ -3,7 +3,6 @@ package ru.greenhubserver.service;
 import io.minio.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ import ru.greenhubserver.exceptions.BadRequestException;
 import ru.greenhubserver.exceptions.NotFoundException;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 @Service
@@ -32,8 +30,7 @@ public class ImageCloudService {
     @PostConstruct
     private void saveDefaultImage(){
         createBucket();
-        File file = new File(defaultImagePath);
-        try (FileInputStream inputStream = new FileInputStream(file)) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(defaultImagePath)) {
             minioClient.putObject(PutObjectArgs.builder()
                     .stream(inputStream, inputStream.available(), -1)
                     .bucket(bucketName)
@@ -46,7 +43,6 @@ public class ImageCloudService {
 
     public void saveImage(MultipartFile file, String name) {
         try (InputStream inputStream = file.getInputStream()){
-//            createBucket();
             minioClient.putObject(PutObjectArgs.builder()
                     .stream(inputStream, inputStream.available(), -1)
                     .bucket(bucketName)
@@ -85,6 +81,8 @@ public class ImageCloudService {
                         .build());
             }
         } catch (Exception e) {
+            System.out.println("===============================================");
+            e.printStackTrace();
             throw new BadRequestException("Image upload exception");
         }
     }
