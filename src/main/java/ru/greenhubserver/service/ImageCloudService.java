@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.greenhubserver.exceptions.BadRequestException;
 import ru.greenhubserver.exceptions.NotFoundException;
+import ru.greenhubserver.utils.ImagePropertiesUtil;
+import ru.greenhubserver.utils.ImageProperty;
 
-import java.io.File;
 import java.io.InputStream;
 
+// todo валидация всего
 @Service
 @RequiredArgsConstructor
 public class ImageCloudService {
@@ -21,20 +23,22 @@ public class ImageCloudService {
     @Value("${minio.bucket}")
     private String bucketName;
 
-    @Value("${minio.defaultImagePath}")
-    private String defaultImagePath;
-
-    @Value("${minio.defaultImageName}")
-    private String defaultImageName;
+    private final ImagePropertiesUtil imagePropertiesUtil;
 
     @PostConstruct
-    private void saveDefaultImage(){
+    private void saveDefaultImages() {
         createBucket();
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(defaultImagePath)) {
+        for (ImageProperty property : imagePropertiesUtil.getProperties()) {
+            saveFromClasspath(property.getPath(), property.getName());
+        }
+    }
+
+    private void saveFromClasspath(String path, String name){
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path)) {
             minioClient.putObject(PutObjectArgs.builder()
                     .stream(inputStream, inputStream.available(), -1)
                     .bucket(bucketName)
-                    .object(defaultImageName)
+                    .object(name)
                     .build());
         } catch (Exception e) {
             throw new BadRequestException("Image upload exception");
@@ -42,7 +46,7 @@ public class ImageCloudService {
     }
 
     public void saveImage(MultipartFile file, String name) {
-        try (InputStream inputStream = file.getInputStream()){
+        try (InputStream inputStream = file.getInputStream()) {
             minioClient.putObject(PutObjectArgs.builder()
                     .stream(inputStream, inputStream.available(), -1)
                     .bucket(bucketName)
@@ -56,18 +60,33 @@ public class ImageCloudService {
 
     public byte[] getImage(String name) {
         try {
-        return IOUtils.toByteArray(minioClient.getObject(GetObjectArgs.builder()
-                .bucket(bucketName)
-                .object(name)
-                .build()));
+            return IOUtils.toByteArray(minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(name)
+                    .build()));
         } catch (Exception e) {
             throw new NotFoundException("Image not found");
         }
     }
 
     public String generateFileName(Long id, MultipartFile file) {
-        return id + file.getOriginalFilename()
+        String extension = file.getOriginalFilename()
                 .substring(file.getOriginalFilename().lastIndexOf("."));
+        if (!extension.equals(".png") && !extension.equals(".jpg") && !extension.equals(".jpeg")) {
+            throw new BadRequestException("Image can be only .jpg or .png or .jpeg");
+        }
+        return id + extension;
+    }
+
+    public void deleteImage(String name) {
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(name)
+                    .build());
+        } catch (Exception e) {
+            throw new NotFoundException("Error while deleting image");
+        }
     }
 
     private void createBucket() {
