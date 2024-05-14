@@ -10,11 +10,11 @@ import ru.greenhubserver.dto.controller.AchievementDto;
 import ru.greenhubserver.dto.controller.UserBigDto;
 import ru.greenhubserver.dto.controller.UserChangesDto;
 import ru.greenhubserver.dto.controller.UserSmallDto;
+import ru.greenhubserver.service.AchievementService;
 import ru.greenhubserver.service.UserService;
 
 import java.security.Principal;
 import java.util.Set;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -22,6 +22,7 @@ import java.util.Set;
         " подписками/подписчиками, достижениями и повышением/понижением ролей")
 public class UserController {
     private final UserService userService;
+    private final AchievementService achievementService;
 
     @GetMapping("/{username}")
     @ResponseStatus(HttpStatus.OK)
@@ -29,7 +30,7 @@ public class UserController {
     public UserBigDto getUser(@PathVariable String username,
                               Principal principal) {
         userService.checkIfUserBanned(principal);
-        return userService.getUser(username);
+        return userService.getUser(username, principal);
     }
 
     @GetMapping("/{id}/subscriptions")
@@ -60,6 +61,16 @@ public class UserController {
         userService.banUser(id, principal);
     }
 
+    @PostMapping("/{id}/unban")
+    @ResponseStatus(HttpStatus.OK)
+    @Secured({"ROLE_ADMIN", "ROLE_MODERATOR"})
+    @Operation(summary = "Разбанивает пользователя, доступно только модератору и администратору")
+    public void unbanUser(@PathVariable Long id,
+                        Principal principal) {
+        userService.checkIfUserBanned(principal);
+        userService.unbanUser(id, principal);
+    }
+
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Меняет данные пользователя")
@@ -71,7 +82,7 @@ public class UserController {
 
     @GetMapping("/{id}/achievements")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Меняет данные пользователя")
+    @Operation(summary = "Возвращает достижения пользователя")
     public Set<AchievementDto> getUserAchievements(@PathVariable Long id,
                                                    Principal principal) {
         userService.checkIfUserBanned(principal);
@@ -125,5 +136,13 @@ public class UserController {
                               Principal principal) {
         userService.checkIfUserBanned(principal);
         userService.downgradeUser(id, principal);
+    }
+
+
+    @GetMapping("/achievements")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Возвращает список всех возможных дотсижений")
+    public Set<AchievementDto> getAchievements(){
+        return achievementService.findAll();
     }
 }

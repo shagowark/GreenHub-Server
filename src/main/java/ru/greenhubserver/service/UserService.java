@@ -79,15 +79,19 @@ public class UserService implements UserDetailsService {
                 .build();
     }
 
-    public UserBigDto getUser(String username) {
-        User user = findByUsername(username);
+    public UserBigDto getUser(String username, Principal principal) {
+        User target = findByUsername(username);
+        User user = findByUsername(principal.getName());
         return UserBigDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .username(user.getUsername())
-                .image(imageCloudService.getImage(user.getImage().getName()))
-                .subscriptionsCount((long) user.getSubscriptions().size())
-                .subscribersCount((long) user.getSubscribers().size())
+                .id(target.getId())
+                .email(target.getEmail())
+                .username(target.getUsername())
+                .image(imageCloudService.getImage(target.getImage().getName()))
+                .subscriptionsCount((long) target.getSubscriptions().size())
+                .subscribersCount((long) target.getSubscribers().size())
+                .state(target.getState())
+                .isSubscribed(user.getSubscriptions().contains(target))
+                .roles(user.getRoles())
                 .build();
     }
 
@@ -125,6 +129,15 @@ public class UserService implements UserDetailsService {
         if (user.equals(target)) throw new BadRequestException("Cannot ban yourself");
         target.setState(State.BANNED);
         target.getPublications().forEach(x -> x.setState(State.BANNED));
+        userRepository.save(target);
+    }
+
+    public void unbanUser(Long id, Principal principal) {
+        User target = findById(id);
+        User user = findByUsername(principal.getName());
+        if (user.equals(target)) throw new BadRequestException("Cannot unban yourself");
+        target.setState(State.VISIBLE);
+        target.getPublications().forEach(x -> x.setState(State.VISIBLE));
         userRepository.save(target);
     }
 
