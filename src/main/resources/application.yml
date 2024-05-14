@@ -8,12 +8,13 @@ spring:
     password: postgres
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     defer-datasource-initialization: true
     show-sql: true
   sql:
     init:
       mode: always
+      continue-on-error: true
 jwt:
   secret: 984hg493gh0439rthr0429uruj2309yh937gc763fe87t3f89723gf
   lifetime: 6h
@@ -22,5 +23,21 @@ minio:
   url: http://localhost:9000
   accessKey: minioadmin
   secretKey: minioadmin
-  defaultImagePath: default.png
-  defaultImageName: default.png
+  image:
+    defaultImagePath: default.png
+    defaultImageName: default.png
+    activeImagePath: active.png
+    activeImageName: active.png
+    bicycleImagePath: bicycle.png
+    bicycleImageName: bicycle.png
+    veganImagePath: vegan.png
+    veganImageName: vegan.png
+    volonterImagePath: volonter.png
+    volonterImageName: volonter.png
+    zhivotniImagePath: zhivotni.png
+    zhivotniImageName: zhivotni.png
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
