@@ -18,5 +18,5 @@ public class UserBigDto {
     private Long subscribersCount;
     private State state;
     private boolean isSubscribed;
-    private Set<Role> roles;
+    private Set<RoleDto> roles;
 }
