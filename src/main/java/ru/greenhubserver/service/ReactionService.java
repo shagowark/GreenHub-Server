@@ -6,11 +6,11 @@ import ru.greenhubserver.entity.Publication;
 import ru.greenhubserver.entity.Reaction;
 import ru.greenhubserver.entity.ReactionType;
 import ru.greenhubserver.entity.User;
+import ru.greenhubserver.exceptions.BadRequestException;
 import ru.greenhubserver.exceptions.NotFoundException;
 import ru.greenhubserver.repository.ReactionRepository;
 
 import java.security.Principal;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +23,22 @@ public class ReactionService {
         ReactionType reactionType = ReactionType.valueOf(reactionTypeStr);
         User user = userService.findByUsername(principal.getName());
         Publication publication = publicationService.findPublicationById(publicationId);
-        Reaction reaction = findByPublicationIdAndUserId(publication, user).orElse(null);
-        if (reaction != null) {
-            reaction.setReactionType(reactionType);
+        Reaction reaction = null;
+        try {
+            reaction = findByPublicationIdAndUserId(publication, user);
+        } catch (Exception ignored) {}
 
-            if (reactionType == ReactionType.LIKE) {
-                publication.setRating(publication.getRating() + 2);
+        if (reaction != null) {
+            if (reaction.getReactionType() != reactionType) {
+                reaction.setReactionType(reactionType);
+
+                if (reactionType == ReactionType.LIKE) {
+                    publication.setRating(publication.getRating() + 2);
+                } else {
+                    publication.setRating(publication.getRating() - 2);
+                }
             } else {
-                publication.setRating(publication.getRating() - 2);
+                throw new BadRequestException("This reaction already exists");
             }
         } else {
             reaction = new Reaction();
@@ -49,14 +57,14 @@ public class ReactionService {
         reactionRepository.save(reaction);
     }
 
-    public Optional<Reaction> findByPublicationIdAndUserId(Publication publication, User user) {
-        return reactionRepository.findByPublicationAndUser(publication, user);
+    public Reaction findByPublicationIdAndUserId(Publication publication, User user) {
+        return reactionRepository.findByPublicationAndUser(publication, user).orElseThrow(() -> new NotFoundException("Reaction not found"));
     }
 
     public void deleteReaction(Long publicationId, Principal principal) {
         User user = userService.findByUsername(principal.getName());
         Publication publication = publicationService.findPublicationById(publicationId);
-        Reaction reaction = findByPublicationIdAndUserId(publication, user).orElseThrow(() -> new NotFoundException("Reaction not found"));
+        Reaction reaction = findByPublicationIdAndUserId(publication, user);
         if (reaction.getReactionType() == ReactionType.LIKE) {
             publication.setRating(publication.getRating() - 1);
         } else {

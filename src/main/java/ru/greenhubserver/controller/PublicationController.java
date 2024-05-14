@@ -18,7 +18,6 @@ import java.security.Principal;
 import java.util.Set;
 
 // TODO tests
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/publications")
@@ -41,7 +40,20 @@ public class PublicationController {
         if (principal != null) {
             userService.checkIfUserBanned(principal);
         }
-        return publicationService.findPublications(pageable, tags);
+        return publicationService.findPublications(pageable, tags, principal);
+    }
+
+    @GetMapping("/subscriptions")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Возвращает все публикации подписок пользователя")
+    public Page<PublicationDtoResponse> getPublicationsFromSubscriptions(Pageable pageable,
+                                                        @RequestParam(required = false) Set<String> tags,
+                                                        Principal principal
+    ) {
+        if (principal != null) {
+            userService.checkIfUserBanned(principal);
+        }
+        return publicationService.findPublicationsFromSubscriptions(pageable, tags, principal);
     }
 
     @GetMapping("/user/{id}")
@@ -51,7 +63,7 @@ public class PublicationController {
                                                               Pageable pageable,
                                                               Principal principal) {
         userService.checkIfUserBanned(principal);
-        return publicationService.findPublications(pageable, id);
+        return publicationService.findPublications(pageable, id, principal);
     }
 
     @PostMapping()
@@ -72,7 +84,7 @@ public class PublicationController {
         publicationService.deletePublication(id, principal);
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/ban")
     @ResponseStatus(HttpStatus.OK)
     @Secured({"ROLE_ADMIN", "ROLE_MODERATOR"})
     @Operation(summary = "Банит публикацию, доступно только модератору и администратору")

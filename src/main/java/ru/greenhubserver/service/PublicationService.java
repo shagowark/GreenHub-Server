@@ -16,7 +16,7 @@ import ru.greenhubserver.repository.PublicationRepository;
 import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
-
+//todo logs api
 @Service
 @RequiredArgsConstructor
 public class PublicationService {
@@ -58,23 +58,49 @@ public class PublicationService {
         publicationRepository.save(publication);
     }
 
-    public Page<PublicationDtoResponse> findPublications(Pageable pageable, Set<String> tagNames) {
+    public Page<PublicationDtoResponse> findPublications(Pageable pageable, Set<String> tagNames, Principal principal) {
         Page<Publication> found;
-        found = tagNames == null ? publicationRepository.findAll(pageable) : publicationRepository.findAllByTags(pageable, tagNames);
-        return new PageImpl<>(publicationToDto(found));
+        User user = null;
+        if (principal != null) {
+            user = userService.findByUsername(principal.getName());
+        }
+        found = tagNames == null
+                ? publicationRepository.findAll(pageable)
+                : publicationRepository.findAllByTags(pageable, tagNames.stream().map(tagService::getTagByName).collect(Collectors.toSet()));
+        return new PageImpl<>(publicationToDto(found, user));
     }
 
-    public Page<PublicationDtoResponse> findPublications(Pageable pageable, Long userId) {
+    public Page<PublicationDtoResponse> findPublications(Pageable pageable, Long userId, Principal principal) {
         Page<Publication> found = publicationRepository.findAllByUser(userService.findById(userId), pageable);
-        return new PageImpl<>(publicationToDto(found));
+        User user = null;
+        if (principal != null) {
+            user = userService.findByUsername(principal.getName());
+        }
+        return new PageImpl<>(publicationToDto(found, user));
+    }
+
+    public Page<PublicationDtoResponse> findPublicationsFromSubscriptions(Pageable pageable, Set<String> tagNames, Principal principal) {
+        Page<Publication> found;
+        User user = userService.findByUsername(principal.getName());
+        Set<User> subscriptions = user.getSubscriptions();
+        if (tagNames == null) {
+            found = publicationRepository.findAllInUsers(pageable, subscriptions);
+        } else {
+            found = publicationRepository.findAllInUsersByTags(pageable, subscriptions, tagNames.stream().map(tagService::getTagByName).collect(Collectors.toSet()));
+        }
+        return new PageImpl<>(publicationToDto(found, user));
     }
 
     public void deletePublication(Long id, Principal principal) {
         User user = userService.findByUsername(principal.getName());
         if (!findPublicationById(id).getUser().equals(user)
-                || user.getRoles().contains(roleService.getModeratorRole())
-                || user.getRoles().contains(roleService.getAdminRole())) {
+                && !(user.getRoles().contains(roleService.getModeratorRole())
+                || user.getRoles().contains(roleService.getAdminRole()))) {
             throw new NoRightsException("Cannot delete other's publication if you're not amin or moder");
+        }
+        Publication publication = findPublicationById(id);
+        if (publication.getImage() != null) {
+            imageCloudService.deleteImage(publication.getImage().getName());
         }
         publicationRepository.deleteById(id);
     }
@@ -91,24 +117,35 @@ public class PublicationService {
         );
     }
 
-    private List<PublicationDtoResponse> publicationToDto(Page<Publication> found) {
+    private List<PublicationDtoResponse> publicationToDto(Page<Publication> found, User user) {
         List<PublicationDtoResponse> res = new ArrayList<>();
         for (Publication entity : found) {
             if (entity.getState() == State.BANNED) continue;
 
             PublicationDtoResponse dto = PublicationDtoResponse.builder()
+                    .id(entity.getId())
                     .title(entity.getTitle())
                     .text(entity.getText())
                     .tags(entity.getTags().stream().map(Tag::getName).collect(Collectors.toSet()))
                     .image(entity.getImage() != null ? imageCloudService.getImage(entity.getImage().getName()) : null)
                     .rating(entity.getRating())
                     .commentsCount(entity.getCommentsCount())
+                    .createdTime(entity.getCreatedTime())
                     .author(UserSmallDto.builder()
                             .userId(entity.getUser().getId())
                             .username(entity.getUser().getUsername())
                             .userImage(imageCloudService.getImage(entity.getUser().getImage().getName())).build())
                     .build();
-
+            if (user != null) {
+                Reaction reaction = null;
+                for (Reaction elem : entity.getReactions()){
+                    if (elem.getUser() == user){
+                        reaction = elem;
+                        break;
+                    }
+                }
+                dto.setReactionType(reaction == null ? null : reaction.getReactionType());
+            }
             res.add(dto);
         }
         return res;

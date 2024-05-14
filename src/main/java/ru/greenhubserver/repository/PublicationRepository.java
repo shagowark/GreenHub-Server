@@ -12,8 +12,14 @@ import java.util.Set;
 
 public interface PublicationRepository extends JpaRepository<Publication, Long> {
 
-    @Query(nativeQuery = true, value = "SELECT * FROM publication p JOIN publication_tag pt ON p.id = pt.publication_id WHERE pt.tag_id IN (SELECT id FROM tag WHERE tag.name IN :tagNames)")
-    Page<Publication> findAllByTags(Pageable pageable, Set<String> tagNames);
+    @Query("SELECT DISTINCT p FROM Publication p JOIN p.tags t WHERE t IN :tags")
+    Page<Publication> findAllByTags(Pageable pageable, Set<Tag> tags);
 
     Page<Publication> findAllByUser(User user, Pageable pageable);
+
+    @Query("SELECT p FROM Publication p WHERE p.user IN :users")
+    Page<Publication> findAllInUsers(Pageable pageable, Set<User> users);
+
+    @Query("SELECT p FROM Publication p JOIN p.tags t WHERE p.user IN :users AND t IN :tags")
+    Page<Publication> findAllInUsersByTags(Pageable pageable, Set<User> users, Set<Tag> tags);
 }
