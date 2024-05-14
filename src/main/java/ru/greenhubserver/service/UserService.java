@@ -8,10 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.greenhubserver.dto.controller.AchievementDto;
-import ru.greenhubserver.dto.controller.UserBigDto;
-import ru.greenhubserver.dto.controller.UserChangesDto;
-import ru.greenhubserver.dto.controller.UserSmallDto;
+import ru.greenhubserver.dto.controller.*;
 import ru.greenhubserver.dto.security.RegistrationUserDto;
 import ru.greenhubserver.entity.*;
 import ru.greenhubserver.exceptions.BadRequestException;
@@ -91,7 +88,12 @@ public class UserService implements UserDetailsService {
                 .subscribersCount((long) target.getSubscribers().size())
                 .state(target.getState())
                 .isSubscribed(user.getSubscriptions().contains(target))
-                .roles(user.getRoles())
+                .roles(user.getRoles().stream().map(x ->
+                        RoleDto.builder()
+                                .id(x.getId())
+                                .name(x.getName())
+                                .build()
+                ).collect(Collectors.toSet()))
                 .build();
     }
 
