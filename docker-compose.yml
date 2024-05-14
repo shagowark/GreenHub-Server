@@ -7,7 +7,7 @@ services:
     expose:
       - 5432
     ports:
-      - published: 5433
+      - published: 5432
         target: 5432
 
   minio:
