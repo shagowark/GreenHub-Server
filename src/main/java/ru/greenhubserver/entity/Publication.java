@@ -14,6 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "publication")
+// TODO если сломается то убрать все EAGER
 public class Publication {
 
     @Id
@@ -40,13 +41,13 @@ public class Publication {
     @Enumerated(EnumType.STRING)
     private State state;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "image_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Image image;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "publication_tag",
             joinColumns = @JoinColumn(name = "publication_id"),
@@ -56,17 +57,17 @@ public class Publication {
     @EqualsAndHashCode.Exclude
     private Set<Tag> tags;
 
-    @OneToMany(mappedBy = "publication", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "publication", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Reaction> reactions;
 
-    @OneToMany(mappedBy = "publication", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "publication", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Comment> comments;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
