@@ -2,6 +2,7 @@ package ru.greenhubserver.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +15,7 @@ import ru.greenhubserver.entity.*;
 import ru.greenhubserver.exceptions.BadRequestException;
 import ru.greenhubserver.exceptions.NoRightsException;
 import ru.greenhubserver.exceptions.NotFoundException;
+import ru.greenhubserver.exceptions.UserBannedException;
 import ru.greenhubserver.repository.UserRepository;
 
 import java.security.Principal;
@@ -42,6 +44,7 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = findByUsername(username);
+        if (user.getState() == State.BANNED) throw new UserBannedException("User is banned");
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
@@ -88,9 +91,8 @@ public class UserService implements UserDetailsService {
                 .subscribersCount((long) target.getSubscribers().size())
                 .state(target.getState())
                 .isSubscribed(user.getSubscriptions().contains(target))
-                .roles(user.getRoles().stream().map(x ->
+                .roles(target.getRoles().stream().map(x ->
                         RoleDto.builder()
-                                .id(x.getId())
                                 .name(x.getName())
                                 .build()
                 ).collect(Collectors.toSet()))

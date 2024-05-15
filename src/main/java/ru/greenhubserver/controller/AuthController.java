@@ -2,6 +2,7 @@ package ru.greenhubserver.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,14 +23,14 @@ public class AuthController {
     @PostMapping("/auth")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Авторизует пользователя (возвращает JWT токен)")
-    public JwtResponseDto authentication(@RequestBody JwtRequestDto authRequest) {
+    public JwtResponseDto authentication(@RequestBody @Valid JwtRequestDto authRequest) {
         return authService.createAuthToken(authRequest);
     }
 
     @PostMapping(value = "/registration")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Регистрирует нового пользователя")
-    public JwtResponseDto registration(@RequestBody RegistrationUserDto registrationUserDto) {
+    public JwtResponseDto registration(@RequestBody @Valid RegistrationUserDto registrationUserDto) {
         authService.createNewUser(registrationUserDto);
         return authService.createAuthToken(registrationUserDto);
     }
