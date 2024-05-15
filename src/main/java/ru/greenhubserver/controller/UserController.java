@@ -141,7 +141,7 @@ public class UserController {
 
     @GetMapping("/achievements")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Возвращает список всех возможных дотсижений")
+    @Operation(summary = "Возвращает список всех возможных достижений")
     public Set<AchievementDto> getAchievements(){
         return achievementService.findAll();
     }
