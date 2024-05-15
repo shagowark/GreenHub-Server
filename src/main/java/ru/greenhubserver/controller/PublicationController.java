@@ -125,7 +125,7 @@ public class PublicationController {
 
     @PostMapping("/{id}/comments")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Удаляет реакцию на публикацию")
+    @Operation(summary = "Добавляет комментарий на публикацию")
     public void postComment(@PathVariable Long id,
                             @RequestBody TextDto textDto,
                             Principal principal) {
