@@ -2,6 +2,7 @@ package ru.greenhubserver.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -69,7 +70,7 @@ public class PublicationController {
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Добавляет публикацию")
-    public void postPublication(@ModelAttribute PublicationDtoRequest publicationDtoRequest,
+    public void postPublication(@ModelAttribute @Valid PublicationDtoRequest publicationDtoRequest,
                                 Principal principal) {
         userService.checkIfUserBanned(principal);
         publicationService.savePublication(publicationDtoRequest, principal);
@@ -98,7 +99,7 @@ public class PublicationController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Добавляет реакцию на публикацию")
     public void postReaction(@PathVariable Long id,
-                             @RequestBody ReactionTypeDto reactionType,
+                             @RequestBody @Valid ReactionTypeDto reactionType,
                              Principal principal) {
         userService.checkIfUserBanned(principal);
         reactionService.saveReaction(id, reactionType.getReactionType(), principal);
@@ -127,7 +128,7 @@ public class PublicationController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Добавляет комментарий на публикацию")
     public void postComment(@PathVariable Long id,
-                            @RequestBody TextDto textDto,
+                            @RequestBody @Valid TextDto textDto,
                             Principal principal) {
         userService.checkIfUserBanned(principal);
         commentService.saveComment(id, textDto.getText(), principal);
