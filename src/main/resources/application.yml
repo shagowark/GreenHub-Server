@@ -1,0 +1,51 @@
+server:
+  port: 8080 #менять на 443
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: ihseeranegubza
+    key-store-type: PKCS12
+    key-alias: tomcat
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+    show-sql: true
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+jwt:
+  secret: 984hg493gh0439rthr0429uruj2309yh937gc763fe87t3f89723gf
+  lifetime: 6h
+minio:
+  bucket: images
+  url: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  image:
+    defaultImagePath: default.png
+    defaultImageName: default.png
+    activeImagePath: active.png
+    activeImageName: active.png
+    bicycleImagePath: bicycle.png
+    bicycleImageName: bicycle.png
+    veganImagePath: vegan.png
+    veganImageName: vegan.png
+    volonterImagePath: volonter.png
+    volonterImageName: volonter.png
+    zhivotniImagePath: zhivotni.png
+    zhivotniImageName: zhivotni.png
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
