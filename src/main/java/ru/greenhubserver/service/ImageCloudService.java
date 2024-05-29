@@ -14,7 +14,6 @@ import ru.greenhubserver.utils.ImageProperty;
 
 import java.io.InputStream;
 
-// todo валидация всего
 @Service
 @RequiredArgsConstructor
 public class ImageCloudService {

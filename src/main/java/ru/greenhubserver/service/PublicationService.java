@@ -16,7 +16,6 @@ import ru.greenhubserver.repository.PublicationRepository;
 import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
-//todo logs api
 @Service
 @RequiredArgsConstructor
 public class PublicationService {
@@ -67,7 +66,7 @@ public class PublicationService {
         found = tagNames == null
                 ? publicationRepository.findAll(pageable)
                 : publicationRepository.findAllByTags(pageable, tagNames.stream().map(tagService::getTagByName).collect(Collectors.toSet()));
-        return new PageImpl<>(publicationToDto(found, user));
+        return new PageImpl<>(publicationToDto(found, user), pageable, found.getTotalElements());
     }
 
     public Page<PublicationDtoResponse> findPublications(Pageable pageable, Long userId, Principal principal) {
@@ -76,7 +75,7 @@ public class PublicationService {
         if (principal != null) {
             user = userService.findByUsername(principal.getName());
         }
-        return new PageImpl<>(publicationToDto(found, user));
+        return new PageImpl<>(publicationToDto(found, user), pageable, found.getTotalElements());
     }
 
     public Page<PublicationDtoResponse> findPublicationsFromSubscriptions(Pageable pageable, Set<String> tagNames, Principal principal) {
@@ -88,7 +87,7 @@ public class PublicationService {
         } else {
             found = publicationRepository.findAllInUsersByTags(pageable, subscriptions, tagNames.stream().map(tagService::getTagByName).collect(Collectors.toSet()));
         }
-        return new PageImpl<>(publicationToDto(found, user));
+        return new PageImpl<>(publicationToDto(found, user), pageable, found.getTotalElements());
     }
 
     public void deletePublication(Long id, Principal principal) {

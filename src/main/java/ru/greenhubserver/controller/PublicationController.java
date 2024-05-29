@@ -18,7 +18,6 @@ import ru.greenhubserver.service.UserService;
 import java.security.Principal;
 import java.util.Set;
 
-// TODO tests
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/publications")
