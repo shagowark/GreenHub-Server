@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import ru.greenhubserver.exceptions.*;
 
-// todo чекнуть почему валидация вовращает 403
 @ControllerAdvice
 @RestController
 public class GlobalExceptionHandler {
@@ -63,5 +63,11 @@ public class GlobalExceptionHandler {
         StringBuilder builder = new StringBuilder();
         ex.getBindingResult().getAllErrors().forEach(error -> builder.append(error.getDefaultMessage()).append("\n"));
         return new AppError(HttpStatus.BAD_REQUEST.value(), builder.toString());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(value = HttpStatus.PAYLOAD_TOO_LARGE)
+    public AppError handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        return new AppError(HttpStatus.PAYLOAD_TOO_LARGE.value(), e.getMessage());
     }
 }

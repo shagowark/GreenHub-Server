@@ -19,7 +19,7 @@ public class RegistrationUserDto {
     private String password;
 
     @NotBlank(message = "Email mustn't be blank")
-    @Size(max = 30, message = "Email must be <=30 characters")
+    @Size(max = 50, message = "Email must be <=50 characters")
     @Pattern(regexp = "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b", message = "Wrong characters in email")
     private String email;
 }
