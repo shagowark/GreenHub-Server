@@ -7,9 +7,9 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=grnhub_db
-      - POSTGRES_USER=grnhub_db_user
-      - POSTGRES_PASSWORD=$2a$12$4UVus2Y1sf8k2HYzO47qyuDidwlUmeLb.ZE8Hh7qDxvcnVe8uT.HO
+      - POSTGRES_PASSWORD=postgres
+    expose:
+      - 5432
     ports:
       - published: 5432
         target: 5432
@@ -37,7 +37,7 @@ services:
     image: greenhub
     container_name: greenhub
     ports:
-      - published: 80
+      - published: 8080
         target: 8080
     depends_on:
       - postgres
