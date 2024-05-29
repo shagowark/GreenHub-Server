@@ -2,6 +2,7 @@ package ru.greenhubserver.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
@@ -74,7 +75,7 @@ public class UserController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Меняет данные пользователя")
-    public void editUser(@PathVariable Long id, UserChangesDto dto,
+    public void editUser(@PathVariable Long id, @Valid UserChangesDto dto,
                          Principal principal) {
         userService.checkIfUserBanned(principal);
         userService.editUser(id, dto, principal);
