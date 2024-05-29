@@ -118,7 +118,7 @@
     </dependencies>
 
     <build>
-        <finalName>GreenHubServer-release-1.0.0</finalName>
+        <finalName>GreenHubServer-release-1.0.1</finalName>
 
         <plugins>
             <plugin>
