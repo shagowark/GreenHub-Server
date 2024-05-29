@@ -1,11 +1,16 @@
 server:
   port: 8080
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: ihseeranegubza
+    key-store-type: PKCS12
+    key-alias: tomcat
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://postgres:5432/postgres
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://postgres:5432/grnhub_db
+    username: grnhub_db_user
+    password: $2a$12$4UVus2Y1sf8k2HYzO47qyuDidwlUmeLb.ZE8Hh7qDxvcnVe8uT.HO #grnhub_db_password Bcrypt12
   jpa:
     hibernate:
       ddl-auto: update
