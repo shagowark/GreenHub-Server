@@ -14,7 +14,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "publication")
-// TODO если сломается то убрать все EAGER
 public class Publication {
 
     @Id

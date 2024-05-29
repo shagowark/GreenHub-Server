@@ -118,6 +118,8 @@
     </dependencies>
 
     <build>
+        <finalName>GreenHubServer-release-1.0.0</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
