@@ -3,10 +3,12 @@ package ru.greenhubserver.dto.controller;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data
+@Builder
 public class UserChangesDto {
     @NotBlank(message = "Email mustn't be blank")
     @Size(max = 50, message = "Email must be <=50 characters")
