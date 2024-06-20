@@ -1,5 +1,6 @@
 package ru.greenhubserver.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.greenhubserver.entity.Image;
@@ -11,6 +12,7 @@ import ru.greenhubserver.repository.ImageRepository;
 public class ImageService {
     private final ImageRepository imageRepository;
 
+    @Transactional
     public Image save(Image image){
         return imageRepository.save(image);
     }

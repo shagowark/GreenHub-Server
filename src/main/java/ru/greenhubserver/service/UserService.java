@@ -2,7 +2,6 @@ package ru.greenhubserver.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,7 +10,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.greenhubserver.dto.controller.*;
 import ru.greenhubserver.dto.security.RegistrationUserDto;
-import ru.greenhubserver.entity.*;
+import ru.greenhubserver.entity.Image;
+import ru.greenhubserver.entity.State;
+import ru.greenhubserver.entity.User;
 import ru.greenhubserver.exceptions.BadRequestException;
 import ru.greenhubserver.exceptions.NoRightsException;
 import ru.greenhubserver.exceptions.NotFoundException;
@@ -127,6 +128,7 @@ public class UserService implements UserDetailsService {
         return res;
     }
 
+    @Transactional
     public void banUser(Long id, Principal principal) {
         User target = findById(id);
         User user = findByUsername(principal.getName());
@@ -136,6 +138,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(target);
     }
 
+    @Transactional
     public void unbanUser(Long id, Principal principal) {
         User target = findById(id);
         User user = findByUsername(principal.getName());
@@ -145,6 +148,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(target);
     }
 
+    @Transactional
     public void editUser(Long id, UserChangesDto dto, Principal principal) {
         User user = findByUsername(principal.getName());
         if (!user.getId().equals(id)) {
@@ -176,6 +180,7 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toSet());
     }
 
+    @Transactional
     public void editUserAchievements(Long id, Set<String> achievements) {
         User user = findById(id);
         user.setAchievements(
@@ -184,6 +189,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void subscribeToUser(Long id, Principal principal) {
         User target = findById(id);
         User user = findByUsername(principal.getName());
@@ -197,6 +203,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(target);
     }
 
+    @Transactional
     public void unsubscribeToUser(Long id, Principal principal) {
         User target = findById(id);
         User user = findByUsername(principal.getName());
@@ -210,6 +217,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(target);
     }
 
+    @Transactional
     public void upgradeUser(Long id, Principal principal) {
         User target = findById(id);
         User user = findByUsername(principal.getName());
@@ -222,6 +230,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(target);
     }
 
+    @Transactional
     public void downgradeUser(Long id, Principal principal) {
         User target = findById(id);
         User user = findByUsername(principal.getName());
