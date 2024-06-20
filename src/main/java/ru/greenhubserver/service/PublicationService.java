@@ -1,5 +1,6 @@
 package ru.greenhubserver.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,6 +28,7 @@ public class PublicationService {
     private final RoleService roleService;
 
 
+    @Transactional
     public void savePublication(PublicationDtoRequest publicationDtoRequest, Principal principal) {
         Image image = null;
         if (publicationDtoRequest.getImage() != null) {
@@ -53,6 +55,7 @@ public class PublicationService {
         publicationRepository.save(publication);
     }
 
+    @Transactional
     public void savePublication(Publication publication) {
         publicationRepository.save(publication);
     }
@@ -90,6 +93,7 @@ public class PublicationService {
         return new PageImpl<>(publicationToDto(found, user), pageable, found.getTotalElements());
     }
 
+    @Transactional
     public void deletePublication(Long id, Principal principal) {
         User user = userService.findByUsername(principal.getName());
         if (!findPublicationById(id).getUser().equals(user)
@@ -104,6 +108,7 @@ public class PublicationService {
         publicationRepository.deleteById(id);
     }
 
+    @Transactional
     public void banPublication(Long id) {
         Publication publication = findPublicationById(id);
         publication.setState(State.BANNED);

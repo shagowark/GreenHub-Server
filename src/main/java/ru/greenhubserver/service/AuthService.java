@@ -1,6 +1,7 @@
 package ru.greenhubserver.service;
 
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +28,7 @@ public class AuthService {
         return new JwtResponseDto(token);
     }
 
+    @Transactional
     public IdDto createNewUser(RegistrationUserDto registrationUserDto) {
         try {
             userService.findByUsername(registrationUserDto.getUsername());

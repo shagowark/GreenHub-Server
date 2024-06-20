@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.Set;
-
 @Entity
 @Data
 @Table(name = "reaction")
@@ -19,7 +17,7 @@ public class Reaction {
     @Enumerated(EnumType.STRING)
     private ReactionType reactionType;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "publication_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

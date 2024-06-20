@@ -55,7 +55,7 @@ public class Publication {
     @EqualsAndHashCode.Exclude
     private Set<Tag> tags;
 
-    @OneToMany(mappedBy = "publication", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "publication", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Reaction> reactions;

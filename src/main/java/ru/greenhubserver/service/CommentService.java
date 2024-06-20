@@ -1,5 +1,6 @@
 package ru.greenhubserver.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,6 +25,7 @@ public class CommentService {
     private final ImageCloudService imageCloudService;
 
 
+    @Transactional
     public void saveComment(Long publicationId, String text, Principal principal) {
         User user = userService.findByUsername(principal.getName());
         Publication publication = publicationService.findPublicationById(publicationId);
